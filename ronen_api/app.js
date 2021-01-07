@@ -18,4 +18,12 @@ app.use('*', (req, res) => {
     res.send('You seem to be lost, young one')
 })
 
+app.use((err, req, res, next) => {
+    return res.status(err.statusCode).json({
+        successful: false,
+        message: err.message,
+        error: err.error
+    })
+})
+
 app.listen(8080)
