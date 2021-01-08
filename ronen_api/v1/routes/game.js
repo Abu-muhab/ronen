@@ -5,4 +5,6 @@ const { body } = require('express-validator')
 
 router.post('/add', gameController.addGame)
 
+router.get('/listGames', gameController.listGames)
+
 module.exports = router
