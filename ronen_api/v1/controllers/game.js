@@ -2,11 +2,12 @@ const { validationResult } = require('express-validator')
 const formidable = require('formidable')
 const admin = require('firebase-admin')
 const uuid = require('uuid')
+
 exports.addGame = (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return next({
-            statusCode: 500,
+            statusCode: 400,
             message: 'Invalid params',
             error: errors.array()
         })
@@ -23,7 +24,8 @@ exports.addGame = (req, res, next) => {
             })
         }
 
-        if (fields.name === undefined || fields.description === undefined || files.coverImage === undefined) {
+        if (fields.name === undefined || fields.description === undefined ||
+            files.coverImage === undefined || new Date(fields.release_date).toString() === 'Invalid Date') {
             return next({
                 statusCode: 400,
                 message: 'Invalid params'
@@ -48,7 +50,10 @@ exports.addGame = (req, res, next) => {
                     const data = {
                         name: fields.name,
                         description: fields.description,
-                        coverImage: val[0]
+                        coverImage: val[0],
+                        date_created: admin.firestore.Timestamp.now(),
+                        release_date: admin.firestore.Timestamp.fromDate(
+                            new Date(fields.release_date))
                     }
                     admin.firestore().collection('games').doc().set(data).then(val => {
                         res.status(201).json({
