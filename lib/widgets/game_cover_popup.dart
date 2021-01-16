@@ -1,11 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:ronen/models/game.dart';
 import 'package:ronen/widgets/decorated_icon.dart';
 
 class GameCoverPopup extends StatefulWidget {
-  final String name;
-  final String asset;
+  final Game game;
 
-  GameCoverPopup({this.name, this.asset});
+  GameCoverPopup({this.game});
   @override
   State createState() => GameCoverPopupState();
 }
@@ -24,7 +25,7 @@ class GameCoverPopupState extends State<GameCoverPopup> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.name,
+                widget.game.name,
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -50,8 +51,10 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                 Container(
                   height: 150,
                   width: double.infinity,
-                  child: Image.asset(
-                    widget.asset,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.game.imageUrl,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
                     fit: BoxFit.cover,
                   ),
                 ),

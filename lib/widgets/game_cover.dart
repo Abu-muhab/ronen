@@ -1,10 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:ronen/globals.dart';
+import 'package:ronen/models/game.dart';
 import 'package:ronen/widgets/game_cover_popup.dart';
 
 class GameCover extends StatefulWidget {
-  final String asset;
-  final String name;
-  GameCover({this.asset, this.name});
+  final Game game;
+  GameCover({this.game});
   @override
   State createState() => GameCoverState();
 }
@@ -24,15 +26,50 @@ class GameCoverState extends State<GameCover> {
                   insetPadding: EdgeInsets.zero,
                   backgroundColor: Colors.transparent,
                   content: GameCoverPopup(
-                    name: widget.name,
-                    asset: widget.asset,
+                    game: widget.game,
                   ),
                 );
               });
         },
         child: Row(
           children: [
-            Expanded(child: Image.asset(widget.asset, fit: BoxFit.cover)),
+            Expanded(
+              child: CachedNetworkImage(
+                imageUrl: widget.game.imageUrl,
+                placeholder: (context, url) => Stack(
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) {
+                        return LinearGradient(
+                            tileMode: TileMode.mirror,
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[
+                              kPrimaryColorDark,
+                              kPrimaryColorLight,
+                            ]).createShader(bounds);
+                      },
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    ),
+                    Center(
+                      child: SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: CircularProgressIndicator(
+                          valueColor: new AlwaysStoppedAnimation<Color>(
+                              Colors.blue[900]),
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                fit: BoxFit.cover,
+              ),
+            ),
             Container(
               height: constraint.maxHeight,
               width: 40,
