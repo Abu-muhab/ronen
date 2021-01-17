@@ -30,6 +30,9 @@ class SearchState extends State<Search> {
     scrollController.addListener(() async {
       if ((scrollController.position.pixels + 1) >=
           scrollController.position.maxScrollExtent) {
+        if (isLazyLoading == true) {
+          return;
+        }
         if (numberOfPages != null) {
           if (lastVisiblePage == numberOfPages - 1) {
             return;
@@ -61,7 +64,7 @@ class SearchState extends State<Search> {
     }
     try {
       http.Response response = await http.get(endpointBaseUrl +
-          "/game/searchGames?&query=$query&page=$lastVisiblePage&hitsPerPage=4");
+          "/game/searchGames?&query=$query&page=$lastVisiblePage&hitsPerPage=8");
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         print(data);
@@ -87,6 +90,9 @@ class SearchState extends State<Search> {
       }
     } catch (e) {
       print(e);
+      if (append == true) {
+        lastVisiblePage--;
+      }
       if (append == false) {
         setState(() {
           fetchingGme = false;
@@ -179,57 +185,75 @@ class SearchState extends State<Search> {
                                     style: TextStyle(color: Colors.white)),
                               ),
                             )
-                          : RefreshIndicator(
-                              child: ListView.builder(
-                                controller: scrollController,
-                                itemBuilder: (context, count) {
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: 180,
-                                        child: GameCover(
-                                          key: new GlobalKey(),
-                                          game: games[count],
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 15,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        color: kPrimaryColorDark,
-                                      ),
-                                      count == games.length - 1 &&
-                                              isLazyLoading == true
-                                          ? Container(
-                                              height: 100,
-                                              child: Center(
-                                                child: SizedBox(
-                                                  height: 25,
-                                                  width: 25,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    valueColor:
-                                                        new AlwaysStoppedAnimation<
-                                                                Color>(
-                                                            Colors.blue[900]),
-                                                    strokeWidth: 2,
+                          : games.length == 0
+                              ? Center(
+                                  child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    child: Text(
+                                      "The term you entered did not bring up any results",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.blueAccent,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                )
+                              : RefreshIndicator(
+                                  child: ListView.builder(
+                                    controller: scrollController,
+                                    itemBuilder: (context, count) {
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: 180,
+                                            child: GameCover(
+                                              key: new GlobalKey(),
+                                              game: games[count],
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 15,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            color: kPrimaryColorDark,
+                                          ),
+                                          count == games.length - 1 &&
+                                                  isLazyLoading == true
+                                              ? Container(
+                                                  height: 100,
+                                                  child: Center(
+                                                    child: SizedBox(
+                                                      height: 25,
+                                                      width: 25,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        valueColor:
+                                                            new AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                Colors
+                                                                    .blue[900]),
+                                                        strokeWidth: 2,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                            )
-                                          : Container()
-                                    ],
-                                  );
-                                },
-                                itemCount: games.length,
-                                physics: BouncingScrollPhysics(),
-                              ),
-                              onRefresh: () async {
-                                lastVisiblePage = 0;
-                                await getGames(
-                                    query: queryController.text.trim());
-                              }),
+                                                )
+                                              : Container()
+                                        ],
+                                      );
+                                    },
+                                    itemCount: games.length,
+                                    physics: BouncingScrollPhysics(),
+                                  ),
+                                  onRefresh: () async {
+                                    lastVisiblePage = 0;
+                                    games = null;
+                                    await getGames(
+                                        query: queryController.text.trim());
+                                  }),
             ))
           ],
         ),

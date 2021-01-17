@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
-import 'package:ronen/widgets/decorated_icon.dart';
+import 'package:ronen/util.dart';
 
 class GameCoverPopup extends StatefulWidget {
   final Game game;
@@ -12,11 +14,11 @@ class GameCoverPopup extends StatefulWidget {
 }
 
 class GameCoverPopupState extends State<GameCoverPopup> {
+  bool showLoadingIndicator = false;
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      // color: Colors.transparent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -58,128 +60,135 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                Container(
-                  height: 200,
+                showLoadingIndicator == true
+                    ? LinearProgressIndicator()
+                    : Container(),
+                Padding(
+                  padding: EdgeInsets.all(15),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          child: Center(
+                      Row(
+                        children: [
+                          Expanded(
+                              child: Text(
+                            widget.game.name,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
+                          )),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                color: kAccentColor,
+                                borderRadius: BorderRadius.circular(5)),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '50',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Hours played',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w400),
-                                      )
-                                    ],
-                                  ),
+                                Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.blueAccent,
+                                  size: 12,
                                 ),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Unavailable',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Availability',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w400),
-                                      )
-                                    ],
-                                  ),
+                                SizedBox(
+                                  width: 10,
                                 ),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '12-1-2020',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Release Date',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w400),
-                                      )
-                                    ],
-                                  ),
-                                )
+                                Text(
+                                  convertTimeStampToString(
+                                      widget.game.releaseDate),
+                                  style: TextStyle(
+                                      color: Colors.blueAccent, fontSize: 12),
+                                ),
                               ],
                             ),
                           ),
-                        ),
-                      ),
-                      Container(
-                        height: 50,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            DecoratedIcon(
-                              backgroundColor: Colors.white,
-                              width: 50,
-                              iconSize: 30,
-                              iconColor: Colors.blueAccent,
-                              iconData: Icons.videogame_asset_outlined,
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            DecoratedIcon(
-                              backgroundColor: Colors.blueAccent,
-                              width: 50,
-                              iconSize: 30,
-                              iconColor: Colors.white,
-                              iconData: Icons.link,
-                            ),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            DecoratedIcon(
-                              backgroundColor: Colors.blueAccent,
-                              width: 50,
-                              iconSize: 30,
-                              iconColor: Colors.white,
-                              iconData: Icons.card_giftcard,
-                            )
-                          ],
-                        ),
+                        ],
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
+                      ),
+                      Text(
+                        widget.game.description,
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          RaisedButton(
+                            onPressed: () {},
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.bookmark_border,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Bookmark',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            color: kPrimaryColorLight,
+                          ),
+                          RaisedButton(
+                            onPressed: () {},
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.disc_full_sharp,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Borrow CD',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            color: Colors.blue[900],
+                          ),
+                          RaisedButton(
+                            onPressed: () {},
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.shopping_cart,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Buy CD',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            color: Colors.green,
+                          )
+                        ],
                       )
                     ],
                   ),

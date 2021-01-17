@@ -1,9 +1,9 @@
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Game {
-  DateTime releaseDate;
+  Timestamp releaseDate;
   String description;
-  DateTime dateCreated;
+  Timestamp dateCreated;
   String name;
   String imageUrl;
   String gameId;
@@ -16,15 +16,11 @@ class Game {
       this.releaseDate});
   factory Game.fromJson(Map json) {
     return Game(
-        releaseDate: DateTime.fromMillisecondsSinceEpoch((json['release_date']
-                    ['_seconds'] +
-                json['release_date']['_nanoseconds'] * pow(10, -9))
-            .round()),
+        releaseDate: Timestamp(json['release_date']['_seconds'],
+            json['release_date']['_nanoseconds']),
         description: json['description'],
-        dateCreated: DateTime.fromMillisecondsSinceEpoch((json['date_created']
-                    ['_seconds'] +
-                json['date_created']['_nanoseconds'] * pow(10, -9))
-            .round()),
+        dateCreated: Timestamp(json['date_created']['_seconds'],
+            json['date_created']['_nanoseconds']),
         name: json['name'],
         imageUrl: json['cover']['imageUrl'],
         gameId: json['gameId']);

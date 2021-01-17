@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "246862054871",
+    "project_id": "ronen-14b2a",
+    "storage_bucket": "ronen-14b2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246862054871:android:9df64ef8f697493b173792",
+        "android_client_info": {
+          "package_name": "com.ghostcorp.ronen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "246862054871-4i102m6f4c5mnj539dma6j2tul4gr4sh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4I086Pg2jQBeW2QPYxsH7arOSUNzNkCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "246862054871-4i102m6f4c5mnj539dma6j2tul4gr4sh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

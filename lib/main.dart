@@ -1,9 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ronen/views/home.dart';
 import 'package:ronen/views/search.dart';
+import 'package:ronen/views/signin.dart';
+import 'package:ronen/views/signup.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -19,9 +24,11 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       routes: {
         'home': (context) => MyHomePage(),
-        'search': (context) => Search()
+        'search': (context) => Search(),
+        'signin': (context) => Signin(),
+        'signup': (context) => Signup(),
       },
-      home: MyHomePage(),
+      initialRoute: 'signin',
     );
   }
 }
