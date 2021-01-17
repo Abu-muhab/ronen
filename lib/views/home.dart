@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
+import 'package:ronen/providers/auth.dart';
 import 'package:ronen/widgets/decorated_icon.dart';
 import 'package:ronen/widgets/game_cover.dart';
 import 'package:http/http.dart' as http;
@@ -364,6 +366,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     Icon(
                       Icons.settings,
                       color: Colors.white,
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Provider.of<AuthProvider>(context, listen: false)
+                            .signout();
+                      },
+                      child: Icon(
+                        Icons.power_settings_new,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
