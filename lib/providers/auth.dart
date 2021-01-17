@@ -26,6 +26,9 @@ class AuthProvider extends ChangeNotifier {
       return true;
     }).catchError((err) {
       print(err);
+      if (err.toString().contains('unknown')) {
+        throw ("No internet connection");
+      }
       throw ("Email or Password is incorrect");
     });
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ronen/providers/auth.dart';
+import 'package:ronen/views/bookmarks.dart';
 import 'package:ronen/views/home.dart';
 import 'package:ronen/views/search.dart';
 import 'package:ronen/views/signin.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         'search': (context) => Search(),
         'signin': (context) => Signin(),
         'signup': (context) => Signup(),
+        'bookmarks': (context) => Bookmarks(),
       },
       initialRoute: 'home',
     );

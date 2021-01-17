@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> getGames({bool append = false, String lastGameId}) async {
+    print('getting games');
     if (append == false) {
       setState(() {
         fetchingGme = true;
@@ -335,38 +336,43 @@ class _MyHomePageState extends State<MyHomePage> {
                     SizedBox(
                       height: 50,
                     ),
-                    Icon(
-                      Icons.bookmark,
-                      color: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, 'bookmarks');
+                      },
+                      child: Icon(
+                        Icons.bookmark,
+                        color: Colors.white,
+                      ),
                     ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Icon(
-                      Icons.shopping_cart,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Icon(
-                      Icons.chat,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Icon(
-                      Icons.supervisor_account_sharp,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Icon(
-                      Icons.settings,
-                      color: Colors.white,
-                    ),
+                    // SizedBox(
+                    //   height: 50,
+                    // ),
+                    // Icon(
+                    //   Icons.shopping_cart,
+                    //   color: Colors.white,
+                    // ),
+                    // SizedBox(
+                    //   height: 50,
+                    // ),
+                    // Icon(
+                    //   Icons.chat,
+                    //   color: Colors.white,
+                    // ),
+                    // SizedBox(
+                    //   height: 50,
+                    // ),
+                    // Icon(
+                    //   Icons.supervisor_account_sharp,
+                    //   color: Colors.white,
+                    // ),
+                    // SizedBox(
+                    //   height: 50,
+                    // ),
+                    // Icon(
+                    //   Icons.settings,
+                    //   color: Colors.white,
+                    // ),
                     SizedBox(
                       height: 50,
                     ),
