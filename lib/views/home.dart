@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     try {
       http.Response response = await http.get(endpointBaseUrl +
-          "/game/listGames?limit=8&order_by=$orderBy${lastGameId == null ? "" : "&last_visible_id=$lastGameId"}");
+          "/game/listGames?limit=9&order_by=$orderBy${lastGameId == null ? "" : "&last_visible_id=$lastGameId"}");
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         if (data['data']['length'] == 0 && this.games != null) {
@@ -132,6 +132,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   actions: [
                     GestureDetector(
                       child: Icon(Icons.search),
+                      onTap: () {
+                        Navigator.pushNamed(context, 'search');
+                      },
                     ),
                     SizedBox(
                       width: 10,

@@ -6,7 +6,7 @@ import 'package:ronen/widgets/game_cover_popup.dart';
 
 class GameCover extends StatefulWidget {
   final Game game;
-  GameCover({this.game});
+  GameCover({this.game, Key key}) : super(key: key);
   @override
   State createState() => GameCoverState();
 }

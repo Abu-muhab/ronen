@@ -30,7 +30,6 @@ dependencies:
   cupertino_icons: ^1.0.0
   http: ^0.12.2
   cached_network_image: ^2.5.0
-  lazy_load_scrollview: ^1.2.0
 
 dev_dependencies:
   flutter_test:
