@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 String convertTimeStampToString(Timestamp timestamp) {
   return "${timestamp.toDate().day}/${timestamp.toDate().month}/${timestamp.toDate().year}";
@@ -13,4 +14,24 @@ bool validateEmail(String value) {
   } else {
     return true;
   }
+}
+
+void showBasicMessageDialog(String message, BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(message),
+          actions: [
+            FlatButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "OKAY",
+                  style: TextStyle(color: Colors.blueAccent),
+                ))
+          ],
+        );
+      });
 }

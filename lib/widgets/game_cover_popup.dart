@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ronen/api/user.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
+import 'package:ronen/providers/auth.dart';
 import 'package:ronen/util.dart';
 
 class GameCoverPopup extends StatefulWidget {
@@ -61,7 +64,10 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                   ),
                 ),
                 showLoadingIndicator == true
-                    ? LinearProgressIndicator()
+                    ? LinearProgressIndicator(
+                        valueColor: new AlwaysStoppedAnimation<Color>(
+                            kPrimaryColorDark),
+                      )
                     : Container(),
                 Padding(
                   padding: EdgeInsets.all(15),
@@ -123,7 +129,31 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           RaisedButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              setState(() {
+                                showLoadingIndicator = true;
+                              });
+                              UserApi.addToBookmarks(
+                                      userId: Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .firebaseUser
+                                          .uid,
+                                      gameId: widget.game.gameId)
+                                  .then((value) {
+                                setState(() {
+                                  showLoadingIndicator = false;
+                                });
+                                if (value == true) {
+                                  showBasicMessageDialog(
+                                      "Added to Bookmarks", context);
+                                }
+                              }).catchError((err) {
+                                setState(() {
+                                  showLoadingIndicator = false;
+                                });
+                                showBasicMessageDialog(err.toString(), context);
+                              });
+                            },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

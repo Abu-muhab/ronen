@@ -147,24 +147,8 @@ class SigninState extends State<Signin> {
                                   setState(() {
                                     isLoading = false;
                                   });
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          content: Text(err.toString()),
-                                          actions: [
-                                            FlatButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  "OKAY",
-                                                  style: TextStyle(
-                                                      color: Colors.blueAccent),
-                                                ))
-                                          ],
-                                        );
-                                      });
+                                  showBasicMessageDialog(
+                                      err.toString(), context);
                                 });
                               }
                             },
@@ -173,7 +157,11 @@ class SigninState extends State<Signin> {
                                     child: SizedBox(
                                       width: 25,
                                       height: 25,
-                                      child: CircularProgressIndicator(),
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            new AlwaysStoppedAnimation<Color>(
+                                                kPrimaryColorDark),
+                                      ),
                                     ),
                                   )
                                 : Text(
