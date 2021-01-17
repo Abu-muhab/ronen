@@ -22,6 +22,7 @@ class SearchState extends State<Search> {
   bool isLazyLoading = false;
   int lastVisiblePage = 0;
   TextEditingController queryController = TextEditingController();
+  int numberOfPages;
 
   @override
   void initState() {
@@ -29,6 +30,11 @@ class SearchState extends State<Search> {
     scrollController.addListener(() async {
       if ((scrollController.position.pixels + 1) >=
           scrollController.position.maxScrollExtent) {
+        if (numberOfPages != null) {
+          if (lastVisiblePage == numberOfPages - 1) {
+            return;
+          }
+        }
         if (isLazyLoading == false) {
           setState(() {
             isLazyLoading = true;
@@ -43,7 +49,8 @@ class SearchState extends State<Search> {
     });
   }
 
-  Future<void> getGames({bool append = false, String query}) async {
+  Future<void> getGames(
+      {bool append = false, String query, bool refresh = false}) async {
     if (query == "") {
       return;
     }
@@ -59,6 +66,7 @@ class SearchState extends State<Search> {
         Map data = JsonDecoder().convert(response.body);
         print(data);
         List rawGames = data['data']['games'];
+        numberOfPages = data['data']['numberOfPages'];
         List<Game> games;
         games = rawGames.map((e) {
           return Game.fromJson(e);
@@ -218,7 +226,9 @@ class SearchState extends State<Search> {
                                 physics: BouncingScrollPhysics(),
                               ),
                               onRefresh: () async {
-                                await getGames();
+                                lastVisiblePage = 0;
+                                await getGames(
+                                    query: queryController.text.trim());
                               }),
             ))
           ],
