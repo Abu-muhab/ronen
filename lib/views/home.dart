@@ -362,34 +362,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Colors.white,
                       ),
                     ),
-                    // SizedBox(
-                    //   height: 50,
-                    // ),
-                    // Icon(
-                    //   Icons.shopping_cart,
-                    //   color: Colors.white,
-                    // ),
-                    // SizedBox(
-                    //   height: 50,
-                    // ),
-                    // Icon(
-                    //   Icons.chat,
-                    //   color: Colors.white,
-                    // ),
-                    // SizedBox(
-                    //   height: 50,
-                    // ),
-                    // Icon(
-                    //   Icons.supervisor_account_sharp,
-                    //   color: Colors.white,
-                    // ),
-                    // SizedBox(
-                    //   height: 50,
-                    // ),
-                    // Icon(
-                    //   Icons.settings,
-                    //   color: Colors.white,
-                    // ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, 'games');
+                      },
+                      child: Icon(
+                        Icons.videogame_asset_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(
                       height: 50,
                     ),

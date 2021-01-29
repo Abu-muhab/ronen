@@ -25,4 +25,14 @@ class Game {
         imageUrl: json['cover']['imageUrl'],
         gameId: json['gameId']);
   }
+
+  factory Game.fromJson2(Map json) {
+    return Game(
+        releaseDate: json['release_date'],
+        description: json['description'],
+        dateCreated: json['date_created'],
+        name: json['name'],
+        imageUrl: json['cover']['imageUrl'],
+        gameId: json['gameId']);
+  }
 }

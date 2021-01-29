@@ -8,6 +8,7 @@ import 'package:ronen/views/home.dart';
 import 'package:ronen/views/search.dart';
 import 'package:ronen/views/signin.dart';
 import 'package:ronen/views/signup.dart';
+import 'package:ronen/views/games.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         'signin': (context) => Signin(),
         'signup': (context) => Signup(),
         'bookmarks': (context) => Bookmarks(),
+        'games': (context) => MyGames()
       },
       initialRoute: 'home',
     );

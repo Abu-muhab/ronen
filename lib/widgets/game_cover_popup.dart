@@ -160,7 +160,7 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.bookmark_border,
+                                  Icons.playlist_add_sharp,
                                   color: Colors.white,
                                   size: 12,
                                 ),
@@ -168,7 +168,7 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                                   width: 10,
                                 ),
                                 Text(
-                                  'Bookmark',
+                                  'Wishlist',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
