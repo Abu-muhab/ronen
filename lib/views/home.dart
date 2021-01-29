@@ -258,56 +258,73 @@ class _MyHomePageState extends State<MyHomePage> {
                                               TextStyle(color: Colors.white)),
                                     ),
                                   )
-                                : RefreshIndicator(
-                                    child: ListView.builder(
-                                      controller: scrollController,
-                                      itemBuilder: (context, count) {
-                                        return Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            SizedBox(
-                                              height: 180,
-                                              child: GameCover(
-                                                game: games[count],
-                                              ),
-                                            ),
-                                            Container(
-                                              height: 15,
-                                              width: MediaQuery.of(context)
+                                : games.length == 0
+                                    ? Center(
+                                        child: Container(
+                                          width: MediaQuery.of(context)
                                                   .size
-                                                  .width,
-                                              color: kPrimaryColorDark,
-                                            ),
-                                            count == games.length - 1 &&
-                                                    isLazyLoading == true
-                                                ? Container(
-                                                    height: 100,
-                                                    child: Center(
-                                                      child: SizedBox(
-                                                        height: 25,
-                                                        width: 25,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          valueColor:
-                                                              new AlwaysStoppedAnimation<
-                                                                      Color>(
-                                                                  Colors.blue[
-                                                                      900]),
-                                                          strokeWidth: 2,
+                                                  .width *
+                                              0.6,
+                                          child: Text(
+                                            "Nothing to see here yet",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.blueAccent,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      )
+                                    : RefreshIndicator(
+                                        child: ListView.builder(
+                                          controller: scrollController,
+                                          itemBuilder: (context, count) {
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  height: 180,
+                                                  child: GameCover(
+                                                    game: games[count],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 15,
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  color: kPrimaryColorDark,
+                                                ),
+                                                count == games.length - 1 &&
+                                                        isLazyLoading == true
+                                                    ? Container(
+                                                        height: 100,
+                                                        child: Center(
+                                                          child: SizedBox(
+                                                            height: 25,
+                                                            width: 25,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              valueColor:
+                                                                  new AlwaysStoppedAnimation<
+                                                                          Color>(
+                                                                      Colors.blue[
+                                                                          900]),
+                                                              strokeWidth: 2,
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Container()
-                                          ],
-                                        );
-                                      },
-                                      itemCount: games.length,
-                                      physics: BouncingScrollPhysics(),
-                                    ),
-                                    onRefresh: () async {
-                                      await getGames();
-                                    }),
+                                                      )
+                                                    : Container()
+                                              ],
+                                            );
+                                          },
+                                          itemCount: games.length,
+                                          physics: BouncingScrollPhysics(),
+                                        ),
+                                        onRefresh: () async {
+                                          await getGames();
+                                        }),
                       ))
                     ],
                   ),
@@ -341,7 +358,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.pushNamed(context, 'bookmarks');
                       },
                       child: Icon(
-                        Icons.bookmark,
+                        Icons.list_alt_outlined,
                         color: Colors.white,
                       ),
                     ),

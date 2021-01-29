@@ -35,3 +35,25 @@ void showBasicMessageDialog(String message, BuildContext context) {
         );
       });
 }
+
+void showLoadingDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: SizedBox(
+                  height: 25,
+                  width: 25,
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            ],
+          ),
+        );
+      });
+}

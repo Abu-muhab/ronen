@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ronen/api/payment_api.dart';
 import 'package:ronen/api/user.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
 import 'package:ronen/providers/auth.dart';
 import 'package:ronen/util.dart';
+import 'package:flutter_paystack/flutter_paystack.dart';
 
 class GameCoverPopup extends StatefulWidget {
   final Game game;
@@ -197,7 +199,42 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                             color: Colors.blue[900],
                           ),
                           RaisedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              showLoadingDialog(context);
+                              PaymentApi.getInstance().then((paymentApi) async {
+                                paymentApi
+                                    .initializeGamePurchaseTransaction(
+                                        context: context,
+                                        fee: 500,
+                                        gameId: widget.game.gameId)
+                                    .then((details) async {
+                                  Navigator.pop(context);
+                                  CheckoutResponse response =
+                                      await paymentApi.beginTransaction(
+                                          context: context,
+                                          transactionDetails: details);
+                                  // if (response.status) {
+                                  //   Navigator.popUntil(
+                                  //       context, ModalRoute.withName('home'));
+                                  // }
+                                }).catchError((err) {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          content: Text(err.toString()),
+                                          actions: [
+                                            FlatButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text("CLOSE"))
+                                          ],
+                                        );
+                                      });
+                                });
+                              });
+                            },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

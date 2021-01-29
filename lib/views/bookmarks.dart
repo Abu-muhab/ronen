@@ -63,7 +63,7 @@ class BookmarksState extends State<Bookmarks> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Color.fromRGBO(0, 0, 20, 1),
-        title: Text('Bookmarks'),
+        title: Text('Wishlist'),
         actions: [
           SizedBox(
             width: 10,
@@ -99,32 +99,47 @@ class BookmarksState extends State<Bookmarks> {
                                 style: TextStyle(color: Colors.white)),
                           ),
                         )
-                      : RefreshIndicator(
-                          child: ListView.builder(
-                            itemBuilder: (context, count) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height: 180,
-                                    child: GameCover(
-                                      game: games[count],
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 15,
-                                    width: MediaQuery.of(context).size.width,
-                                    color: kPrimaryColorDark,
-                                  ),
-                                ],
-                              );
-                            },
-                            itemCount: games.length,
-                            physics: BouncingScrollPhysics(),
-                          ),
-                          onRefresh: () async {
-                            await getGames();
-                          }),
+                      : games.length == 0
+                          ? Center(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                child: Text(
+                                  "Nothing to see here yet",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.blueAccent,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            )
+                          : RefreshIndicator(
+                              child: ListView.builder(
+                                itemBuilder: (context, count) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 180,
+                                        child: GameCover(
+                                          game: games[count],
+                                        ),
+                                      ),
+                                      Container(
+                                        height: 15,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        color: kPrimaryColorDark,
+                                      ),
+                                    ],
+                                  );
+                                },
+                                itemCount: games.length,
+                                physics: BouncingScrollPhysics(),
+                              ),
+                              onRefresh: () async {
+                                await getGames();
+                              }),
             ))
           ],
         ),
