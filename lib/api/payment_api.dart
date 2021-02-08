@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
@@ -60,29 +61,32 @@ class PaymentApi {
 
   Future<Map<String, dynamic>> initializeGamePurchaseTransaction(
       {BuildContext context, int fee, String gameId}) async {
-    AuthProvider authProvider =
-        Provider.of<AuthProvider>(context, listen: false);
-    http.Response response =
-        await http.post('$endpointBaseUrl/transaction/initializeGamePurchase',
-            body: JsonEncoder().convert({
-              'email': authProvider.firebaseUser.email,
-              'userId': authProvider.firebaseUser.uid,
-              'amount': fee,
-              'gameId': gameId
-            }),
-            headers: {'Content-Type': 'application/json'});
-    if (response.statusCode == 200) {
-      Map body = JsonDecoder().convert(response.body);
-      if (!body['successful']) {
-        throw (body['message']);
+    try {
+      AuthProvider authProvider =
+          Provider.of<AuthProvider>(context, listen: false);
+      http.Response response =
+          await http.post('$endpointBaseUrl/transaction/initializeGamePurchase',
+              body: JsonEncoder().convert({
+                'email': authProvider.firebaseUser.email,
+                'userId': authProvider.firebaseUser.uid,
+                'amount': fee,
+                'gameId': gameId
+              }),
+              headers: {'Content-Type': 'application/json'});
+      if (response.statusCode == 200) {
+        Map body = JsonDecoder().convert(response.body);
+        if (!body['successful']) {
+          throw (body['message']);
+        }
+        return {
+          'access_code': body['data']['data']['access_code'],
+          'reference': body['data']['data']['reference'],
+          'fee': fee
+        };
       }
-      print(body['data']['data']['reference']);
-      return {
-        'access_code': body['data']['data']['access_code'],
-        'reference': body['data']['data']['reference'],
-        'fee': fee
-      };
+      throw ('Something went wrong. Try again');
+    } on SocketException catch (_) {
+      throw ('No internet connection. Try again');
     }
-    throw ('Server Error');
   }
 }

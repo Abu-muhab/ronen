@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ronen/api/borrow_api.dart';
 import 'package:ronen/api/payment_api.dart';
 import 'package:ronen/api/user.dart';
 import 'package:ronen/globals.dart';
@@ -71,194 +72,218 @@ class GameCoverPopupState extends State<GameCoverPopup> {
                             kPrimaryColorDark),
                       )
                     : Container(),
-                Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                              child: Text(
-                            widget.game.name,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          )),
-                          SizedBox(
-                            width: 10,
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: Text(
+                                widget.game.name,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    color: kAccentColor,
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      color: Colors.blueAccent,
+                                      size: 12,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      convertTimeStampToString(
+                                          widget.game.releaseDate),
+                                      style: TextStyle(
+                                          color: Colors.blueAccent,
+                                          fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                color: kAccentColor,
-                                borderRadius: BorderRadius.circular(5)),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.blueAccent,
-                                  size: 12,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  convertTimeStampToString(
-                                      widget.game.releaseDate),
-                                  style: TextStyle(
-                                      color: Colors.blueAccent, fontSize: 12),
-                                ),
-                              ],
-                            ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            widget.game.description,
+                            style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        widget.game.description,
-                        style: TextStyle(color: Colors.white, fontSize: 14),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          RaisedButton(
-                            onPressed: () async {
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                            child: RaisedButton(
+                          onPressed: () async {
+                            setState(() {
+                              showLoadingIndicator = true;
+                            });
+                            UserApi.addToBookmarks(
+                                    userId: Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .firebaseUser
+                                        .uid,
+                                    gameId: widget.game.gameId)
+                                .then((value) {
                               setState(() {
-                                showLoadingIndicator = true;
+                                showLoadingIndicator = false;
                               });
-                              UserApi.addToBookmarks(
-                                      userId: Provider.of<AuthProvider>(context,
-                                              listen: false)
-                                          .firebaseUser
-                                          .uid,
+                              if (value == true) {
+                                showBasicMessageDialog(
+                                    "Added to Wishlist", context);
+                              }
+                            }).catchError((err) {
+                              setState(() {
+                                showLoadingIndicator = false;
+                              });
+                              showBasicMessageDialog(err.toString(), context);
+                            });
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.playlist_add_sharp,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'Wishlist',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          color: kPrimaryColorLight,
+                        )),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                            child: RaisedButton(
+                          onPressed: () {
+                            showPersistentLoadingIndicator(context);
+                            BorrowApi.borrowCd(widget.game, context)
+                                .then((value) {
+                              Navigator.pop(context);
+                              if (value == true) {
+                                showBasicMessageDialog(
+                                    'Your request is being processed', context);
+                              } else {
+                                showBasicMessageDialog(
+                                    'Something went wrong. Try again', context);
+                              }
+                            }).catchError((err) {
+                              Navigator.pop(context);
+                              showBasicMessageDialog(err.toString(), context);
+                            });
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.disc_full_sharp,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'Borrow',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          color: Colors.blue[900],
+                        )),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                            child: RaisedButton(
+                          onPressed: () {
+                            showPersistentLoadingIndicator(context);
+                            PaymentApi.getInstance().then((paymentApi) async {
+                              paymentApi
+                                  .initializeGamePurchaseTransaction(
+                                      context: context,
+                                      fee: 500,
                                       gameId: widget.game.gameId)
-                                  .then((value) {
-                                setState(() {
-                                  showLoadingIndicator = false;
-                                });
-                                if (value == true) {
-                                  showBasicMessageDialog(
-                                      "Added to Bookmarks", context);
+                                  .then((details) async {
+                                Navigator.pop(context);
+                                CheckoutResponse response =
+                                    await paymentApi.beginTransaction(
+                                        context: context,
+                                        transactionDetails: details);
+                                if (response.status) {
+                                  Navigator.pushNamed(context, 'games');
                                 }
                               }).catchError((err) {
-                                setState(() {
-                                  showLoadingIndicator = false;
-                                });
+                                Navigator.pop(context);
                                 showBasicMessageDialog(err.toString(), context);
                               });
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.playlist_add_sharp,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Wishlist',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            color: kPrimaryColorLight,
+                            });
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.shopping_cart,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'Buy',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                            ],
                           ),
-                          RaisedButton(
-                            onPressed: () {},
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.disc_full_sharp,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Borrow CD',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            color: Colors.blue[900],
-                          ),
-                          RaisedButton(
-                            onPressed: () {
-                              showLoadingDialog(context);
-                              PaymentApi.getInstance().then((paymentApi) async {
-                                paymentApi
-                                    .initializeGamePurchaseTransaction(
-                                        context: context,
-                                        fee: 500,
-                                        gameId: widget.game.gameId)
-                                    .then((details) async {
-                                  Navigator.pop(context);
-                                  CheckoutResponse response =
-                                      await paymentApi.beginTransaction(
-                                          context: context,
-                                          transactionDetails: details);
-                                  // if (response.status) {
-                                  //   Navigator.popUntil(
-                                  //       context, ModalRoute.withName('home'));
-                                  // }
-                                }).catchError((err) {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          content: Text(err.toString()),
-                                          actions: [
-                                            FlatButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("CLOSE"))
-                                          ],
-                                        );
-                                      });
-                                });
-                              });
-                            },
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.shopping_cart,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Buy CD',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            color: Colors.green,
-                          )
-                        ],
-                      )
-                    ],
-                  ),
+                          color: Colors.green,
+                        )),
+                        SizedBox(
+                          width: 10,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                  ],
                 )
               ],
             ),

@@ -36,24 +36,55 @@ void showBasicMessageDialog(String message, BuildContext context) {
       });
 }
 
-void showLoadingDialog(BuildContext context) {
-  showDialog(
+Future<bool> showBasicConfirmationDialog(
+    String message, BuildContext context) async {
+  bool value = await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: SizedBox(
+          content: Text(message),
+          actions: [
+            FlatButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                child: Text(
+                  "YES",
+                  style: TextStyle(color: Colors.blueAccent),
+                )),
+            FlatButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: Text(
+                  "NO",
+                  style: TextStyle(color: Colors.blueAccent),
+                ))
+          ],
+        );
+      });
+  return value;
+}
+
+void showPersistentLoadingIndicator(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
                   height: 25,
                   width: 25,
                   child: CircularProgressIndicator(),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         );
-      });
+      },
+      barrierDismissible: false);
 }
