@@ -14,7 +14,11 @@ class Bookmarks extends StatefulWidget {
   BookmarksState createState() => BookmarksState();
 }
 
+List<Game> savedGames = [];
+double savedScrollOffset;
+
 class BookmarksState extends State<Bookmarks> {
+  ScrollController scrollController = new ScrollController();
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   List<Game> games;
   bool fetchingGme = true;
@@ -22,9 +26,21 @@ class BookmarksState extends State<Bookmarks> {
   @override
   void initState() {
     super.initState();
+    if (savedScrollOffset != null) {
+      scrollController =
+          new ScrollController(initialScrollOffset: savedScrollOffset);
+    }
+    scrollController.addListener(() {
+      savedScrollOffset = scrollController.offset;
+    });
     fetchingGme = true;
+    if (savedGames.length > 0) {
+      games = savedGames;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getGames();
+      if (savedGames.length == 0) {
+        getGames();
+      }
     });
   }
 
@@ -44,6 +60,7 @@ class BookmarksState extends State<Bookmarks> {
           return Game.fromJson(e);
         }).toList();
         this.games = games;
+        savedGames = games;
       }
       setState(() {
         fetchingGme = false;
@@ -58,91 +75,77 @@ class BookmarksState extends State<Bookmarks> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Color.fromRGBO(0, 0, 20, 1),
-        title: Text('Wishlist'),
-        actions: [
-          SizedBox(
-            width: 10,
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      color: kPrimaryColorLight,
+      child: Column(
+        children: [
+          Container(
+            height: 10,
+            width: MediaQuery.of(context).size.width,
+            color: kPrimaryColorDark,
           ),
+          Expanded(
+              child: Padding(
+            padding: EdgeInsets.all(0),
+            child: games == null && fetchingGme == true
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : games == null && fetchingGme == false
+                    ? Center(
+                        child: RaisedButton(
+                          color: Colors.blueAccent,
+                          onPressed: () {
+                            getGames();
+                          },
+                          child: Text('Retry',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      )
+                    : games.length == 0
+                        ? Center(
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              child: Text(
+                                "Nothing to see here yet",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )
+                        : RefreshIndicator(
+                            child: ListView.builder(
+                              itemBuilder: (context, count) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      height: 180,
+                                      child: GameCover(
+                                        game: games[count],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 15,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: kPrimaryColorDark,
+                                    ),
+                                  ],
+                                );
+                              },
+                              itemCount: games.length,
+                              physics: BouncingScrollPhysics(),
+                            ),
+                            onRefresh: () async {
+                              await getGames();
+                            }),
+          ))
         ],
-      ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: kPrimaryColorLight,
-        child: Column(
-          children: [
-            Container(
-              height: 10,
-              width: MediaQuery.of(context).size.width,
-              color: kPrimaryColorDark,
-            ),
-            Expanded(
-                child: Padding(
-              padding: EdgeInsets.all(0),
-              child: games == null && fetchingGme == true
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : games == null && fetchingGme == false
-                      ? Center(
-                          child: RaisedButton(
-                            color: Colors.blueAccent,
-                            onPressed: () {
-                              getGames();
-                            },
-                            child: Text('Retry',
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        )
-                      : games.length == 0
-                          ? Center(
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.6,
-                                child: Text(
-                                  "Nothing to see here yet",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.blueAccent,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            )
-                          : RefreshIndicator(
-                              child: ListView.builder(
-                                itemBuilder: (context, count) {
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: 180,
-                                        child: GameCover(
-                                          game: games[count],
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 15,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        color: kPrimaryColorDark,
-                                      ),
-                                    ],
-                                  );
-                                },
-                                itemCount: games.length,
-                                physics: BouncingScrollPhysics(),
-                              ),
-                              onRefresh: () async {
-                                await getGames();
-                              }),
-            ))
-          ],
-        ),
       ),
     );
   }

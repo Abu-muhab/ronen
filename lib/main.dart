@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ronen/providers/auth.dart';
 import 'package:ronen/views/bookmarks.dart';
-import 'package:ronen/views/home.dart';
+import 'package:ronen/views/page_holder.dart';
 import 'package:ronen/views/search.dart';
 import 'package:ronen/views/signin.dart';
 import 'package:ronen/views/signup.dart';
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
                 if (authProvider.firebaseUser == null) {
                   return Signin();
                 }
-                return MyHomePage();
+                return PageHolder();
               },
             ),
         'search': (context) => Search(),

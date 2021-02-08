@@ -8,43 +8,102 @@ import 'package:http/http.dart' as http;
 import 'package:ronen/providers/auth.dart';
 import 'package:ronen/widgets/game_cover.dart';
 
-class MyGames extends StatelessWidget {
+class MyGames extends StatefulWidget {
+  @override
+  State createState() => MyGamesState();
+}
+
+class MyGamesState extends State<MyGames> {
+  String dropDownValue = 'borrowed';
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: Color.fromRGBO(0, 0, 20, 1),
-            title: Text('My Games'),
-            actions: [
-              SizedBox(
-                width: 10,
-              ),
-            ],
-            bottom: TabBar(
-              tabs: [
-                Tab(
-                  text: 'Purchased',
+    return Column(
+      children: [
+        Container(
+          height: 40,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 15,
                 ),
-                Tab(
-                  text: 'Borrowed',
+                Text(
+                  'View',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15),
                 ),
+                SizedBox(
+                  width: 10,
+                ),
+                DropdownButton<String>(
+                  underline: Container(),
+                  items: [
+                    DropdownMenuItem(
+                        child: Text('Borrowed Games',
+                            style: TextStyle(color: Colors.white)),
+                        value: 'borrowed'),
+                    DropdownMenuItem(
+                      child: Text('Bought games',
+                          style: TextStyle(color: Colors.white)),
+                      value: 'bought',
+                    ),
+                  ],
+                  onChanged: (selected) {
+                    if (dropDownValue == selected) {
+                      return;
+                    }
+                    setState(() {
+                      dropDownValue = selected;
+                    });
+                  },
+                  value: dropDownValue,
+                  dropdownColor: Colors.blueAccent,
+                  elevation: 5,
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                // Text(
+                //   'Choose',
+                //   style: TextStyle(
+                //       color: Colors.white,
+                //       fontWeight: FontWeight.w500,
+                //       fontSize: 15),
+                // ),
+                // SizedBox(
+                //   width: 10,
+                // ),
+                // DropdownButton<String>(
+                //   underline: Container(),
+                //   items: [
+                //     DropdownMenuItem(
+                //         child: Text('All',
+                //             style:
+                //                 TextStyle(color: Colors.white))),
+                //     DropdownMenuItem(
+                //         child: Text('Availabe to lend',
+                //             style:
+                //                 TextStyle(color: Colors.white)))
+                //   ],
+                //   onChanged: (slected) {},
+                //   dropdownColor: Colors.blueAccent,
+                //   elevation: 5,
+                // ),
               ],
             ),
           ),
-          body: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            color: kPrimaryColorLight,
-            child: TabBarView(
-              children: [
-                PurchasedGames(),
-                Container(),
-              ],
-            ),
-          )),
+        ),
+        Container(
+          height: 15,
+          width: MediaQuery.of(context).size.width,
+          color: kPrimaryColorDark,
+        ),
+        Expanded(
+            child: dropDownValue != "bought" ? Container() : PurchasedGames())
+      ],
     );
   }
 }
@@ -56,7 +115,11 @@ class PurchasedGames extends StatefulWidget {
   PurchasedGamesState createState() => PurchasedGamesState();
 }
 
+List<GamePurchaseTransaction> savedPurchaseTransactions = [];
+double savedPurchaseScrollOffset;
+
 class PurchasedGamesState extends State<PurchasedGames> {
+  ScrollController scrollController = new ScrollController();
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   List<GamePurchaseTransaction> transactions;
   bool fetchingTransactions = true;
@@ -64,9 +127,21 @@ class PurchasedGamesState extends State<PurchasedGames> {
   @override
   void initState() {
     super.initState();
+    if (savedPurchaseScrollOffset != null) {
+      scrollController =
+          new ScrollController(initialScrollOffset: savedPurchaseScrollOffset);
+    }
+    scrollController.addListener(() {
+      savedPurchaseScrollOffset = scrollController.offset;
+    });
     fetchingTransactions = true;
+    if (savedPurchaseTransactions.length > 0) {
+      transactions = savedPurchaseTransactions;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getGames();
+      if (savedPurchaseTransactions.length == 0) {
+        getGames();
+      }
     });
   }
 
@@ -86,6 +161,7 @@ class PurchasedGamesState extends State<PurchasedGames> {
           return GamePurchaseTransaction.fromJson(e);
         }).toList();
         this.transactions = transactions;
+        savedPurchaseTransactions = transactions;
       }
       setState(() {
         fetchingTransactions = false;
@@ -106,11 +182,6 @@ class PurchasedGamesState extends State<PurchasedGames> {
       color: kPrimaryColorLight,
       child: Column(
         children: [
-          Container(
-            height: 10,
-            width: MediaQuery.of(context).size.width,
-            color: kPrimaryColorDark,
-          ),
           Expanded(
               child: Padding(
             padding: EdgeInsets.all(0),
@@ -145,6 +216,7 @@ class PurchasedGamesState extends State<PurchasedGames> {
                           )
                         : RefreshIndicator(
                             child: ListView.builder(
+                              controller: scrollController,
                               itemBuilder: (context, count) {
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
