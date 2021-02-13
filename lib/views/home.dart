@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
