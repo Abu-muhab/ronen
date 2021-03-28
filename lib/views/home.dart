@@ -74,15 +74,15 @@ class HomeState extends State<Home> {
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         if (data['data']['length'] == 0 && this.games != null) {
-          if (this.games.length > 0) {
-            Scaffold.of(context).showSnackBar(SnackBar(
-              content: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [Text('You have seen it all!')],
-              ),
-              duration: Duration(milliseconds: 500),
-            ));
-          }
+          // if (this.games.length > 0) {
+          //   Scaffold.of(context).showSnackBar(SnackBar(
+          //     content: Row(
+          //       mainAxisSize: MainAxisSize.min,
+          //       children: [Text('You have seen it all!')],
+          //     ),
+          //     duration: Duration(milliseconds: 500),
+          //   ));
+          // }
         }
         List rawGames = data['data']['games'];
         List<Game> games;

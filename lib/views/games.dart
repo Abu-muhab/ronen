@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ronen/api/borrow_api.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/borrow_transaction.dart';
 import 'package:ronen/models/game_purchase_transaction.dart';
 import 'package:http/http.dart' as http;
 import 'package:ronen/providers/auth.dart';
+import 'package:ronen/util.dart';
+import 'package:ronen/widgets/borrow_history_tile.dart';
 import 'package:ronen/widgets/game_cover.dart';
 
 class MyGames extends StatefulWidget {
@@ -15,6 +18,8 @@ class MyGames extends StatefulWidget {
 }
 
 String savedDropdownState;
+GlobalKey<CurrentBorrowedGameState> currentBorrowedKey = GlobalKey();
+GlobalKey<BorrowingHistoryState> borrowHistoryKey = GlobalKey();
 
 class MyGamesState extends State<MyGames> {
   String dropDownValue = 'borrowed';
@@ -87,33 +92,47 @@ class MyGamesState extends State<MyGames> {
         ),
         Expanded(
             child: dropDownValue != "bought"
-                ? Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: CurrentBorrowedGame(),
-                      ),
-                      Container(
-                        height: 15,
-                        width: MediaQuery.of(context).size.width,
-                        color: kPrimaryColorDark,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
+                ? RefreshIndicator(
+                    child: ListView(
+                      physics: BouncingScrollPhysics(),
+                      children: [
+                        Padding(
                           padding: EdgeInsets.all(10),
-                          child: Text(
-                            "Borrowing History",
-                            style: TextStyle(color: Colors.white, fontSize: 17),
+                          child: CurrentBorrowedGame(
+                            key: currentBorrowedKey,
                           ),
                         ),
-                      ),
-                      Expanded(child: BorrowingHistory())
-                    ],
-                  )
+                        Container(
+                          height: 15,
+                          width: MediaQuery.of(context).size.width,
+                          color: kPrimaryColorDark,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Text(
+                              "Borrowing History",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 17),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                            child: BorrowingHistory(
+                          key: borrowHistoryKey,
+                        ))
+                      ],
+                    ),
+                    onRefresh: () async {
+                      List<Future> futures = [];
+                      futures.add(currentBorrowedKey.currentState.getGames());
+                      futures.add(borrowHistoryKey.currentState.getGames());
+                      await Future.wait(futures);
+                    })
                 : PurchasedGames())
       ],
     );
@@ -151,9 +170,7 @@ class PurchasedGamesState extends State<PurchasedGames> {
       transactions = savedPurchaseTransactions;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (savedPurchaseTransactions.length == 0) {
-        getGames();
-      }
+      getGames();
     });
   }
 
@@ -238,7 +255,9 @@ class PurchasedGamesState extends State<PurchasedGames> {
                                       purchaseTransaction: transactions[count],
                                     ),
                                     Container(
-                                      height: 15,
+                                      height: count == transactions.length - 1
+                                          ? 500
+                                          : 15,
                                       width: MediaQuery.of(context).size.width,
                                       color: kPrimaryColorDark,
                                     ),
@@ -277,7 +296,7 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
   @override
   void initState() {
     super.initState();
-    if (savedPurchaseScrollOffset != null) {
+    if (savedBorrowScrollOffset != null) {
       scrollController =
           new ScrollController(initialScrollOffset: savedBorrowScrollOffset);
     }
@@ -285,13 +304,11 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
       savedBorrowScrollOffset = scrollController.offset;
     });
     fetchingTransactions = true;
-    if (savedPurchaseTransactions.length > 0) {
+    if (savedBorrowTransaction.length > 0) {
       transactions = savedBorrowTransaction;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (savedPurchaseTransactions.length == 0) {
-        getGames();
-      }
+      getGames();
     });
   }
 
@@ -327,70 +344,69 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
       color: kPrimaryColorLight,
-      child: Column(
-        children: [
-          Expanded(
-              child: Padding(
-            padding: EdgeInsets.all(0),
-            child: transactions == null && fetchingTransactions == true
+      child: Padding(
+        padding: EdgeInsets.all(0),
+        child: transactions == null && fetchingTransactions == true
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : transactions == null && fetchingTransactions == false
                 ? Center(
-                    child: CircularProgressIndicator(),
+                    child: RaisedButton(
+                      color: Colors.blueAccent,
+                      onPressed: () {
+                        try {
+                          currentBorrowedKey.currentState.getGames();
+                        } catch (_) {}
+                        getGames();
+                      },
+                      child:
+                          Text('Retry', style: TextStyle(color: Colors.white)),
+                    ),
                   )
-                : transactions == null && fetchingTransactions == false
+                : transactions.length == 0
                     ? Center(
-                        child: RaisedButton(
-                          color: Colors.blueAccent,
-                          onPressed: () {
-                            getGames();
-                          },
-                          child: Text('Retry',
-                              style: TextStyle(color: Colors.white)),
+                        child: Container(
+                          height: 500,
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 70),
+                            child: Text(
+                              "Nothing to see here yet",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                       )
-                    : transactions.length == 0
-                        ? Center(
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              child: Text(
-                                "Nothing to see here yet",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.blueAccent,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
+                    : Column(
+                        children: [
+                          Column(
+                            children: transactions.map((e) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  BorrowHistoryTile(
+                                    transaction: e,
+                                  ),
+                                  Container(
+                                    height: 15,
+                                    width: MediaQuery.of(context).size.width,
+                                    color: kPrimaryColorDark,
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(
+                            height: 400,
                           )
-                        : RefreshIndicator(
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemBuilder: (context, count) {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    GameCover(
-                                      game: transactions[count].game,
-                                      borrowTransaction: transactions[count],
-                                    ),
-                                    Container(
-                                      height: 15,
-                                      width: MediaQuery.of(context).size.width,
-                                      color: kPrimaryColorDark,
-                                    ),
-                                  ],
-                                );
-                              },
-                              itemCount: transactions.length,
-                              physics: BouncingScrollPhysics(),
-                            ),
-                            onRefresh: () async {
-                              await getGames();
-                            }),
-          ))
-        ],
+                        ],
+                      ),
       ),
     );
   }
@@ -418,9 +434,7 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
       currentBorrowedGame = savedCurrentBorrowedGame;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (savedPurchaseTransactions.length == 0) {
-        getGames();
-      }
+      getGames();
     });
   }
 
@@ -442,6 +456,7 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
           savedCurrentBorrowedGame = transaction;
         } else {
           this.currentBorrowedGame = BorrowTransaction();
+          savedCurrentBorrowedGame = this.currentBorrowedGame;
         }
       }
       setState(() {
@@ -466,13 +481,18 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
           borderRadius: BorderRadius.circular(15)),
       child: currentBorrowedGame == null && fetchingTransactions == true
           ? Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor:
+                      new AlwaysStoppedAnimation<Color>(kPrimaryColorDark)),
             )
           : currentBorrowedGame == null && fetchingTransactions == false
               ? Center(
                   child: RaisedButton(
                     color: Colors.blueAccent,
                     onPressed: () {
+                      try {
+                        borrowHistoryKey.currentState.getGames();
+                      } catch (_) {}
                       getGames();
                     },
                     child: Text('Retry', style: TextStyle(color: Colors.white)),
@@ -480,7 +500,15 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
                 )
               : currentBorrowedGame.game == null
                   ? Center(
-                      child: Text("You do not have a game in your possession"),
+                      child: Padding(
+                        padding: EdgeInsets.all(40),
+                        child: Text(
+                          "You do not have a game in your possession",
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(color: kPrimaryColorDark, fontSize: 20),
+                        ),
+                      ),
                     )
                   : SizedBox(
                       height: 200,
@@ -500,9 +528,145 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
                               ),
                             ),
                           ),
+                          Center(
+                            child: SizedBox(
+                              height: 200,
+                              width: double.infinity,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Game in hand",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    currentBorrowedGame.game.name,
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Container(),
+                                      CardIcon(
+                                        text: "Swap",
+                                        iconData: Icons.swap_horiz,
+                                      ),
+                                      CardIcon(
+                                        text: "Return",
+                                        onTap: () async {
+                                          bool value =
+                                              await showBasicConfirmationDialog(
+                                                  "Do you want to return this game?",
+                                                  context);
+                                          if (value == true) {
+                                            showPersistentLoadingIndicator(
+                                                context);
+                                            BorrowApi.returnCd(
+                                                    currentBorrowedGame.game,
+                                                    context)
+                                                .then((value) {
+                                              Navigator.pop(context);
+                                              if (value == true) {
+                                                showBasicMessageDialog(
+                                                    'Your request is being processed',
+                                                    context);
+                                                try {
+                                                  currentBorrowedKey
+                                                      .currentState
+                                                      .getGames();
+                                                  borrowHistoryKey.currentState
+                                                      .getGames();
+                                                } catch (_) {}
+                                              } else {
+                                                showBasicMessageDialog(
+                                                    'Something went wrong. Try again',
+                                                    context);
+                                              }
+                                            }).catchError((err) {
+                                              Navigator.pop(context);
+                                              showBasicMessageDialog(
+                                                  err.toString(), context);
+                                            });
+                                          }
+                                        },
+                                        iconData: Icons.keyboard_return,
+                                      ),
+                                      CardIcon(
+                                        text: "Extend",
+                                        iconData: Icons.timer,
+                                      ),
+                                      Container()
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: kPrimaryColorDark,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    padding: EdgeInsets.all(10),
+                                    child: Text(
+                                      "Due Date: ${convertTimeStampToString(currentBorrowedGame.returnDate)}",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     ),
+    );
+  }
+}
+
+class CardIcon extends StatelessWidget {
+  final IconData iconData;
+  final String text;
+  final Function onTap;
+  CardIcon({this.text, this.iconData, this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: kPrimaryColorLight,
+                borderRadius: BorderRadius.circular(10)),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(
+                  iconData,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            text,
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          )
+        ],
+      ),
     );
   }
 }
