@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ronen/globals.dart';
+import 'package:ronen/models/borrow_transaction.dart';
 import 'package:ronen/models/game.dart';
 import 'package:ronen/models/game_purchase_transaction.dart';
 import 'package:ronen/views/transaction_details.dart';
@@ -8,8 +9,11 @@ import 'package:ronen/widgets/game_cover_popup.dart';
 
 class GameCover extends StatefulWidget {
   final Game game;
-  final GamePurchaseTransaction transaction;
-  GameCover({this.game, Key key, this.transaction}) : super(key: key);
+  final GamePurchaseTransaction purchaseTransaction;
+  final BorrowTransaction borrowTransaction;
+  GameCover(
+      {this.game, Key key, this.borrowTransaction, this.purchaseTransaction})
+      : super(key: key);
   @override
   State createState() => GameCoverState();
 }
@@ -94,7 +98,7 @@ class GameCoverState extends State<GameCover> {
                   ],
                 ),
               ),
-              widget.transaction != null
+              widget.purchaseTransaction != null
                   ? Align(
                       alignment: Alignment.bottomLeft,
                       child: Padding(
@@ -105,7 +109,8 @@ class GameCoverState extends State<GameCover> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => TransactionDetails(
-                                          transaction: widget.transaction,
+                                          transaction:
+                                              widget.purchaseTransaction,
                                         )));
                           },
                           child: Row(
