@@ -11,6 +11,7 @@ class PaymentApi {
   static PaymentApi _instance;
   static String paystackPublicKey =
       "pk_test_1ba9e2ab045468113516c27812c38449e38f8309";
+  static PaystackPlugin paystackPlugin;
 
   PaymentApi._();
 
@@ -23,14 +24,15 @@ class PaymentApi {
   }
 
   static Future<dynamic> initialize() {
-    return PaystackPlugin.initialize(publicKey: paystackPublicKey);
+    paystackPlugin = PaystackPlugin();
+    paystackPlugin.initialize(publicKey: paystackPublicKey);
   }
 
   Future<dynamic> getDeliveryFee(distance) async {
     try {
       String url =
           'https://us-central1-delivery-client-5f214.cloudfunctions.net/calculateDeliveryFee?distance=$distance';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         if (data['successful'] == true) {
@@ -56,7 +58,7 @@ class PaymentApi {
       ..amount = transactionDetails['fee'] * 100
       ..reference = transactionDetails['reference']
       ..email = authProvider.firebaseUser.email;
-    return PaystackPlugin.checkout(context, charge: charge);
+    return paystackPlugin.checkout(context, charge: charge);
   }
 
   Future<Map<String, dynamic>> initializeGamePurchaseTransaction(
@@ -64,15 +66,15 @@ class PaymentApi {
     try {
       AuthProvider authProvider =
           Provider.of<AuthProvider>(context, listen: false);
-      http.Response response =
-          await http.post('$endpointBaseUrl/transaction/initializeGamePurchase',
-              body: JsonEncoder().convert({
-                'email': authProvider.firebaseUser.email,
-                'userId': authProvider.firebaseUser.uid,
-                'amount': fee,
-                'gameId': gameId
-              }),
-              headers: {'Content-Type': 'application/json'});
+      http.Response response = await http.post(
+          Uri.parse('$endpointBaseUrl/transaction/initializeGamePurchase'),
+          body: JsonEncoder().convert({
+            'email': authProvider.firebaseUser.email,
+            'userId': authProvider.firebaseUser.uid,
+            'amount': fee,
+            'gameId': gameId
+          }),
+          headers: {'Content-Type': 'application/json'});
       if (response.statusCode == 200) {
         Map body = JsonDecoder().convert(response.body);
         if (!body['successful']) {

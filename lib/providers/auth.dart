@@ -39,7 +39,8 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> signup({String email, String password}) async {
     try {
-      http.Response response = await http.post(endpointBaseUrl + "/auth/signup",
+      http.Response response = await http.post(
+          Uri.parse(endpointBaseUrl + "/auth/signup"),
           headers: {"Content-Type": "application/json"},
           body: JsonEncoder().convert({'email': email, 'password': password}));
 

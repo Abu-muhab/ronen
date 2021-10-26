@@ -39,7 +39,7 @@ class PageHolderState extends State<PageHolder> with TickerProviderStateMixin {
         });
       } else if (tabController.index == 2) {
         setState(() {
-          title = "Wishlist";
+          title = "Bookmark";
           pageIndex = tabController.index;
         });
       }

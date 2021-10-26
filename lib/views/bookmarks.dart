@@ -50,8 +50,8 @@ class BookmarksState extends State<Bookmarks> {
       fetchingGme = true;
     });
     try {
-      http.Response response = await http.get(endpointBaseUrl +
-          "/user/bookmarks?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}");
+      http.Response response = await http.get(Uri.parse(endpointBaseUrl +
+          "/user/bookmarks?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}"));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         List rawGames = data['data']['games'];

@@ -180,8 +180,8 @@ class PurchasedGamesState extends State<PurchasedGames> {
       fetchingTransactions = true;
     });
     try {
-      http.Response response = await http.get(endpointBaseUrl +
-          "/user/purchasedGames?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}");
+      http.Response response = await http.get(Uri.parse(endpointBaseUrl +
+          "/user/purchasedGames?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}"));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         List rawTransactions = data['data']['transactions'];
@@ -318,8 +318,8 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
       fetchingTransactions = true;
     });
     try {
-      http.Response response = await http.get(endpointBaseUrl +
-          "/user/borrowingHistory?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}");
+      http.Response response = await http.get(Uri.parse(endpointBaseUrl +
+          "/user/borrowingHistory?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}"));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         List rawTransactions = data['data']['transactions'];
@@ -349,7 +349,10 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
         padding: EdgeInsets.all(0),
         child: transactions == null && fetchingTransactions == true
             ? Center(
-                child: CircularProgressIndicator(),
+                child: Padding(
+                  padding: EdgeInsets.only(top: 100),
+                  child: CircularProgressIndicator(),
+                ),
               )
             : transactions == null && fetchingTransactions == false
                 ? Center(
@@ -371,7 +374,7 @@ class BorrowingHistoryState extends State<BorrowingHistory> {
                           height: 500,
                           width: MediaQuery.of(context).size.width * 0.6,
                           child: Padding(
-                            padding: EdgeInsets.only(top: 70),
+                            padding: EdgeInsets.only(top: 100),
                             child: Text(
                               "Nothing to see here yet",
                               textAlign: TextAlign.center,
@@ -444,8 +447,8 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
       fetchingTransactions = true;
     });
     try {
-      http.Response response = await http.get(endpointBaseUrl +
-          "/user/borrowedGames?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}");
+      http.Response response = await http.get(Uri.parse(endpointBaseUrl +
+          "/user/borrowedGames?userId=${Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid}"));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         List rawTransactions = data['data']['transactions'];
@@ -477,6 +480,10 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
       width: double.infinity,
       decoration: BoxDecoration(
           color: Colors.blueAccent,
+          gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [Colors.purple, Colors.blue]),
           border: Border.all(),
           borderRadius: BorderRadius.circular(15)),
       child: currentBorrowedGame == null && fetchingTransactions == true
@@ -505,8 +512,7 @@ class CurrentBorrowedGameState extends State<CurrentBorrowedGame> {
                         child: Text(
                           "You do not have a game in your possession",
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: kPrimaryColorDark, fontSize: 20),
+                          style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
                       ),
                     )

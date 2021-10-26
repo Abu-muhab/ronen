@@ -14,7 +14,7 @@ class BorrowApi {
         Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid;
     try {
       http.Response response = await http.post(
-          '$endpointBaseUrl/transaction/borrowGame',
+          Uri.parse('$endpointBaseUrl/transaction/borrowGame'),
           body:
               JsonEncoder().convert({'userId': userId, 'gameId': game.gameId}),
           headers: {'Content-Type': 'application/json'});
@@ -37,7 +37,7 @@ class BorrowApi {
         Provider.of<AuthProvider>(context, listen: false).firebaseUser.uid;
     try {
       http.Response response = await http.post(
-          '$endpointBaseUrl/transaction/returnGame',
+          Uri.parse('$endpointBaseUrl/transaction/returnGame'),
           body:
               JsonEncoder().convert({'userId': userId, 'gameId': game.gameId}),
           headers: {'Content-Type': 'application/json'});

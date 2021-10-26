@@ -63,8 +63,8 @@ class SearchState extends State<Search> {
       });
     }
     try {
-      http.Response response = await http.get(endpointBaseUrl +
-          "/game/searchGames?&query=$query&page=$lastVisiblePage&hitsPerPage=8");
+      http.Response response = await http.get(Uri.parse(endpointBaseUrl +
+          "/game/searchGames?&query=$query&page=$lastVisiblePage&hitsPerPage=8"));
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         print(data);

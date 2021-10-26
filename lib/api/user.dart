@@ -7,7 +7,7 @@ class UserApi {
   static Future<bool> addToBookmarks({String userId, String gameId}) async {
     try {
       http.Response response = await http.post(
-          endpointBaseUrl + "/user/bookmarks",
+          Uri.parse(endpointBaseUrl + "/user/bookmarks"),
           headers: {"Content-Type": "application/json"},
           body: JsonEncoder().convert({"userId": userId, "gameId": gameId}));
 
