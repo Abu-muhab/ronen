@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:ronen/globals.dart';
 import 'package:ronen/models/game.dart';
@@ -72,6 +72,7 @@ class HomeState extends State<Home> {
     try {
       http.Response response = await http.get(Uri.parse(endpointBaseUrl +
           "/game/listGames?limit=8&order_by=$orderBy${lastGameId == null ? "" : "&last_visible_id=$lastGameId"}"));
+      log(response.body);
       if (response.statusCode == 200) {
         Map data = JsonDecoder().convert(response.body);
         if (data['data']['length'] == 0 && this.games != null) {

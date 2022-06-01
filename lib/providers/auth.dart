@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,7 +28,8 @@ class AuthProvider extends ChangeNotifier {
     }).catchError((err) {
       print(err);
       if (err.toString().contains('unknown')) {
-        throw ("No internet connection");
+        log(err.toString());
+        throw ("Something went wrong, please try again");
       }
       throw ("Email or Password is incorrect");
     });
